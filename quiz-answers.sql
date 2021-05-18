@@ -105,3 +105,37 @@ Literature	1
 Medicine	2
 Peace	1
 Physics	1
+
+
+-- Nested SELECT
+
+-- 1.
+ SELECT region, name, population FROM bbc x WHERE population <= ALL (SELECT population FROM bbc y WHERE y.region=x.region AND population>0)
+
+-- 2.
+SELECT COUNT(subject) FROM nobel
+ WHERE subject = 'Chemistry'
+   AND yr BETWEEN 1950 and 1960
+
+-- 3.
+SELECT COUNT(DISTINCT yr) FROM nobel
+ WHERE yr NOT IN (SELECT DISTINCT yr FROM nobel WHERE subject = 'Medicine')
+
+-- 4.
+France
+Germany
+Russia
+Turkey
+
+-- 5.
+SELECT name FROM bbc
+ WHERE gdp > (SELECT MAX(gdp) FROM bbc WHERE region = 'Africa')
+-- 6.
+SELECT name FROM bbc
+ WHERE population < (SELECT population FROM bbc WHERE name='Russia')
+   AND population > (SELECT population FROM bbc WHERE name='Denmark')
+
+-- 7.
+Bangladesh
+India
+Pakistan
