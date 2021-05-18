@@ -187,3 +187,69 @@ SELECT winner, subject
  ORDER BY CASE WHEN subject IN ('Physics', 'Chemistry') THEN 1 ELSE 0 END,subject,winner;
 
 
+-- SELECT within SELECT
+
+-- 1.Bigger than Russia
+SELECT name FROM world
+  WHERE population >
+     (SELECT population FROM world
+      WHERE name='Russia')
+
+-- 2.Richer than UK
+SELECT name
+FROM world
+WHERE continent= 'Europe'
+AND gdp/population >(SELECT gdp/population FROM world 
+                             WHERE name='United Kingdom');
+
+-- 3.Neighbours of Argentina and Australia
+SELECT name, continent 
+FROM world
+WHERE continent IN (SELECT DISTINCT continent FROM world 
+                   WHERE name IN ('Argentina', 'Australia'));
+
+-- 4.Between Canada and Poland
+SELECT name, population
+FROM world 
+WHERE population BETWEEN
+(SELECT population FROM world WHERE name = 'Canada')+1
+AND 
+(SELECT population FROM world WHERE name = 'Poland')-1
+
+-- 5.Percentages of Germany
+SELECT name, 
+CONCAT( CAST (ROUND(population*100/(SELECT population FROM world WHERE name = 'Germany'), 0)AS INT)
+, '%')
+ AS percentage
+FROM world
+WHERE continent = 'Europe'
+
+-- 6.Bigger than every country in Europe
+SELECT name 
+FROM world
+WHERE gdp > (SELECT MAX(gdp)FROM world WHERE continent = 'Europe');
+
+-- 7.Largest in each continent
+SELECT continent, name, area FROM world x
+  WHERE area >= ALL
+    (SELECT area FROM world y
+        WHERE y.continent=x.continent)
+
+-- 8.First country of each continent (alphabetically)
+SELECT continent, name FROM world x
+  WHERE name <= ALL
+    (SELECT name FROM world y
+        WHERE y.continent=x.continent)
+
+-- 9.Difficult Questions That Utilize Techniques Not Covered In Prior Sections
+SELECT name, continent, population 
+FROM world x
+WHERE 25000000 >= ALL (SELECT population FROM world y
+                         WHERE x.continent = y.continent ) 
+
+-- 10.Some countries have populations more than three times that of any of their neighbours (in the same continent). Give the countries and continents.
+SELECT name, continent
+FROM world x
+WHERE population/3 >= ALL (SELECT population from world y
+                           WHERE x.continent = y.continent 
+                           AND x.population != y.population)
