@@ -511,3 +511,66 @@ WHERE movieid IN (
     SELECT id FROM actor 
     WHERE name LIKE 'Art Garfunkel'))
 AND name NOT LIKE 'Art Garfunkel'
+
+
+--Using Null
+
+-- 1.
+SELECT name
+FROM teacher
+WHERE dept IS NULL
+
+-- 2.
+SELECT teacher.name, dept.name
+ FROM teacher INNER JOIN dept
+           ON (teacher.dept=dept.id)
+
+-- 3.
+SELECT teacher.name, dept.name
+ FROM teacher LEFT JOIN dept
+           ON (teacher.dept=dept.id)
+
+-- 4.
+SELECT teacher.name, dept.name
+ FROM teacher RIGHT JOIN dept
+           ON (teacher.dept=dept.id)
+
+-- 5.
+SELECT name, COALESCE(mobile, '07986 444 2266') 
+FROM teacher
+
+-- 6.
+SELECT teacher.name, COALESCE(dept.name, 'None')
+FROM teacher
+LEFT JOIN dept
+ON dept.id = teacher.dept
+
+-- 7.
+SELECT COUNT(name), COUNT(mobile)
+FROM teacher
+
+-- 8.
+SELECT dept.name, COUNT(teacher.dept)
+FROM dept
+LEFT JOIN teacher
+ON dept.id = teacher.dept
+GROUP BY dept.name
+
+-- 9.
+SELECT teacher.name, 
+CASE teacher.dept 
+WHEN '1' THEN 'Sci'
+WHEN '2' THEN 'Sci'
+ELSE 'Art'
+END dept
+FROM teacher
+
+-- 10.
+SELECT teacher.name, 
+CASE teacher.dept
+WHEN '1' THEN 'Sci'
+WHEN '2' THEN 'Sci'
+WHEN '3' THEN 'Art'
+ELSE 'None'
+END dept
+FROM teacher
