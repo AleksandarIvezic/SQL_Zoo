@@ -382,3 +382,132 @@ SELECT mdate,
   FROM game LEFT JOIN goal ON matchid = id
 GROUP BY mdate, matchid, team1, team2
 ORDER BY mdate, matchid, team1, team2
+
+--More JOIN operation
+
+-- 1. 1962 movies
+SELECT id, title
+ FROM movie
+ WHERE yr=1962
+
+-- 2. When was Citizen Kane released?
+SELECT yr
+FROM movie
+WHERE title LIKE 'Citizen Kane'
+
+-- 3. Star Trek movies
+SELECT id, title, yr
+FROM movie
+WHERE title LIKE '%Star trek%'
+ORDER BY yr;
+
+-- 4. id for actor Glenn Close
+SELECT id
+FROM actor
+WHERE name LIKE 'Glenn Close'
+
+-- 5. id for Casablanca
+SELECT id
+FROM movie
+WHERE title = 'Casablanca'
+
+-- 6. Cast list for Casablanca
+SELECT name
+FROM actor
+INNER JOIN casting
+ON actor.id = casting.actorid
+WHERE movieid=27
+
+-- 7. Alien cast list
+SELECT name
+FROM actor
+INNER JOIN casting
+ON actor.id=casting.actorid
+INNER JOIN movie
+ON movie.id=casting.movieid
+WHERE title = 'Alien'
+
+-- 8. Harrison Ford movies
+SELECT title
+FROM movie
+INNER JOIN casting
+ON movie.id = casting.movieid
+INNER JOIN actor
+ON casting.actorid = actor.id
+WHERE name = 'Harrison Ford'
+
+-- 9. Harrison Ford as a supporting actor
+SELECT title
+FROM movie
+INNER JOIN casting
+ON movie.id = casting.movieid
+INNER JOIN actor
+ON actor.id = casting.actorid
+WHERE name = 'Harrison Ford' AND ord!=1;
+
+-- 10. Lead actors in 1962 movies
+SELECT title, name
+FROM movie
+INNER JOIN casting
+ON movie.id = casting.movieid
+INNER JOIN actor 
+ON actor.id = casting.actorid
+WHERE yr = '1962' AND ord=1;
+
+-- 11. Busy years for Rock Hudson
+SELECT yr,COUNT(title) FROM
+  movie JOIN casting ON movie.id=movieid
+        JOIN actor   ON actorid=actor.id
+WHERE name='Doris Day'
+GROUP BY yr
+HAVING COUNT(title) > 2
+
+-- 12. Lead actor in Julie Andrews movies
+SELECT title, name 
+FROM movie
+INNER JOIN casting
+ON movie.id = casting.movieid
+INNER JOIN actor
+ON actor.id = casting.actorid
+WHERE movieid IN ( 
+  SELECT movieid FROM casting 
+  WHERE actorid IN (
+    SELECT id FROM actor
+    WHERE name='Julie Andrews') )
+AND ord =1;
+
+--13. Actors with 15 leading roles
+SELECT name
+FROM actor
+INNER JOIN casting
+ON actor.id=casting.actorid
+INNER JOIN movie
+ON movie.id = casting.movieid
+WHERE ord=1
+GROUP BY name
+HAVING COUNT(actorid)>=15
+
+-- 14.
+SELECT title, COUNT(movieid)
+FROM movie
+INNER JOIN casting
+ON movie.id = casting.movieid
+INNER JOIN actor
+ON actor.id = casting.actorid
+WHERE yr= '1978'
+GROUP BY title
+ORDER BY COUNT(movieid) DESC, title
+
+--15.
+SELECT DISTINCT name
+FROM actor
+INNER JOIN casting
+ON actor.id=casting.actorid
+INNER JOIN movie
+ON movie.id = casting.movieid
+WHERE movieid IN (
+  SELECT movieid FROM casting 
+  WHERE actorid IN (
+    SELECT id FROM actor 
+    WHERE name LIKE 'Art Garfunkel'))
+AND name NOT LIKE 'Art Garfunkel'
