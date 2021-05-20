@@ -574,3 +574,88 @@ WHEN '3' THEN 'Art'
 ELSE 'None'
 END dept
 FROM teacher
+
+--Self join
+
+-- 1.
+SELECT name
+FROM teacher
+WHERE dept IS NULL
+
+-- 2.
+SELECT id 
+FROM stops
+WHERE name LIKE 'Craiglockhart'
+
+-- 3.
+SELECT id, name 
+FROM stops
+INNER JOIN route 
+ON route.stop = stops.id
+WHERE company ='LRT' AND num = '4'
+
+-- 4.
+SELECT company, num, COUNT(*)
+FROM route WHERE stop=149 OR stop=53
+GROUP BY company, num
+HAVING num IN ('4', '45')
+
+-- 5.
+SELECT a.company, a.num, a.stop, b.stop
+FROM route a JOIN route b ON
+  (a.company=b.company AND a.num=b.num)
+WHERE a.stop=53 AND b.stop=149
+
+-- 6.
+SELECT a.company, a.num, stopa.name, stopb.name
+FROM route a JOIN route b ON
+  (a.company=b.company AND a.num=b.num)
+  JOIN stops stopa ON (a.stop=stopa.id)
+  JOIN stops stopb ON (b.stop=stopb.id)
+WHERE stopa.name='Craiglockhart' AND stopb.name='London Road'
+
+-- 7.
+SELECT DISTINCT a.company, a.num
+FROM route a JOIN route b ON
+  (a.company=b.company AND a.num=b.num)
+WHERE a.stop=115 AND b.stop=137
+
+-- 8.
+SELECT DISTINCT a.company, a.num
+FROM route a JOIN route b 
+ON a.company = b.company AND a.num = b.num
+JOIN stops AS stopa
+ON (a.stop = stopa.id)
+JOIN stops AS stopb
+ON (b.stop = stopb.id)
+WHERE stopa.name ='Craiglockhart' AND stopB.name = 'Tollcross'
+
+-- 9.
+SELECT DISTINCT name, company, num
+FROM route 
+JOIN stops
+ON route.stop = stops.id
+WHERE num IN (
+   SELECT num 
+   FROM route 
+   JOIN stops 
+   ON route.stop = stops.id 
+   WHERE name ='Craiglockhart'
+) 
+AND company = 'LRT'
+
+-- 10.
+SELECT bus1.num1, bus1.company1, bus1.match1, bus2.num2, bus2.company2
+FROM (SELECT n_stop.name  match1 ,c.num num1, c.company company1
+  FROM route c JOIN route n  ON c.company=n.company AND c.num=n.num
+  JOIN stops c_stop ON c.stop=c_stop.id
+  JOIN stops n_stop ON n.stop=n_stop.id
+  WHERE c_stop.name='Craiglockhart') bus1
+JOIN (SELECT m_stop.name match2, l.num num2, l.company company2
+  FROM route l
+  JOIN route m
+  ON l.company=m.company AND l.num=m.num
+  JOIN stops l_stop ON l.stop=l_stop.id
+  JOIN stops m_stop ON (m.stop=m_stop.id)
+  WHERE l_stop.name='Lochend') bus2
+ON bus1.match1 = bus2.match2
